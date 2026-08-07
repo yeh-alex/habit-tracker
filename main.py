@@ -5,6 +5,7 @@ from datetime import date, datetime
 from typing import Optional
 from sqlmodel import Session
 from sqlmodel import select
+from fastapi import FastAPI, HTTPException
 
 # --- 定義資料表 ---
 
@@ -83,4 +84,11 @@ def get_streak(habit_id: int):
             current_date -= timedelta(days=1)
         return streak
         
-            
+@app.get("/habits/{habit_id}")
+def get_habit(habit_id: int):
+    with Session(engine) as session:
+        habit = session.get(Habit, habit_id)
+        if not habit:
+            raise HTTPException(status_code=404, detail="Habit not found")
+        else:
+            return habit
