@@ -92,3 +92,17 @@ def get_habit(habit_id: int):
             raise HTTPException(status_code=404, detail="Habit not found")
         else:
             return habit
+
+@app.delete("/habits/{habit_id}")
+def delete_habit(habit_id: int):
+    with Session(engine) as session:
+        habit = session.get(Habit, habit_id)
+        if not habit:
+            raise HTTPException(status_code=404, detail="Habit not found")
+        
+        checkins = session.exec(select(CheckIn).where(CheckIn.habit_id == habit_id)).all()
+        for checkin in checkins:
+            session.delete(checkin)
+        session.delete(habit)
+        session.commit()
+        return {"message": "Habit deleted"}
