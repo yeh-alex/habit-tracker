@@ -106,3 +106,14 @@ def delete_habit(habit_id: int):
         session.delete(habit)
         session.commit()
         return {"message": "Habit deleted"}
+
+@app.put("/habits/{habit_id}")
+def update_habit(habit_id: int, habit: Habit):
+    with Session(engine) as session:
+        habit_update = session.get(Habit,habit_id)
+        if not habit_update:
+            raise HTTPException(status_code=404, detail="Habit not found")
+        habit_update.name  =  habit.name
+        session.commit()
+        session.refresh(habit_update)
+        return habit_update
