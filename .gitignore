@@ -1,0 +1,13 @@
+# 虛擬環境,不推上去
+venv/
+
+# 資料庫檔案,不推上去
+*.db
+
+# Python 快取
+__pycache__/
+*.pyc
+
+# 編輯器設定
+.vscode/
+.idea/
