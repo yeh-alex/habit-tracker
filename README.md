@@ -1,60 +1,67 @@
-# Habit Tracker API
+# Habit Tracker
 
-A backend API for tracking daily habits and check-in streaks, built with FastAPI and SQLModel.
+A full-stack habit tracking app with daily check-ins and streak calculation. Built with FastAPI (backend) and Vue (frontend).
 
 ## Features
 
-- Create and manage habits
+- Create, view, update, and delete habits (full CRUD)
 - Daily check-ins with duplicate prevention
 - Automatic streak calculation (consecutive check-in days)
-- Input validation (rejects check-ins for non-existent habits)
+- Cascade delete (removes a habit's check-ins along with it)
+- Vue frontend to manage habits in the browser
 
 ## Tech Stack
 
-- **FastAPI** – web framework
-- **SQLModel** – ORM (built on SQLAlchemy + Pydantic)
-- **SQLite** – database
+**Backend**
+- FastAPI – web framework
+- SQLModel – ORM (SQLAlchemy + Pydantic)
+- SQLite – database
+
+**Frontend**
+- Vue 3 (via CDN)
 
 ## Getting Started
 
 ### Prerequisites
 - Python 3.10+
 
-### Installation
+### Backend setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/yeh-alex/habit-tracker.git
 cd habit-tracker
-
-# Create and activate a virtual environment
 python -m venv venv
 venv\Scripts\activate      # Windows
-# source venv/bin/activate # macOS/Linux
-
-# Install dependencies
 pip install fastapi uvicorn sqlmodel
-```
-
-### Running the app
-
-```bash
 uvicorn main:app --reload
 ```
 
-Then open http://localhost:8000/docs to explore the API via Swagger UI.
+Backend runs at http://localhost:8000 (API docs at /docs).
+
+### Frontend setup
+
+In a separate terminal:
+
+```bash
+cd frontend
+python -m http.server 5500
+```
+
+Open http://localhost:5500 in your browser.
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/habits` | Create a new habit |
+| POST | `/habits` | Create a habit |
 | GET | `/habits` | List all habits |
-| POST | `/habits/{habit_id}/checkin` | Check in for a habit today |
-| GET | `/habits/{habit_id}/streak` | Get current streak for a habit |
+| GET | `/habits/{id}` | Get a single habit |
+| PUT | `/habits/{id}` | Update a habit |
+| DELETE | `/habits/{id}` | Delete a habit (and its check-ins) |
+| POST | `/habits/{id}/checkin` | Check in for today |
+| GET | `/habits/{id}/streak` | Get current streak |
 
 ## Roadmap
 
-- Get / update / delete individual habits
-- Check-in history endpoint
-- Frontend (Vue / React)
+- Display streaks in the frontend
+- Styling improvements
+- Check-in history view
