@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>習慣追蹤</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <h1>我的習慣</h1>
+
+        <input v-model="newHabitName" placeholder="輸入新習慣">
+        <button @click="addHabit">新增</button>
+
+        <ul>
+            <li v-for="habit in habits" :key="habit.id">
+                {{ habit.name }}
+                <!-- ← 新增:兩個按鈕,把 habit.id 傳給對應的函式 -->
+                <button @click="checkin(habit.id)">打卡</button>
+                <button @click="deleteHabit(habit.id)">刪除</button>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    habits: [],
+                    newHabitName: ''
+                }
+            },
+            mounted() {
+                this.loadHabits()
+            },
+            methods: {
+                loadHabits() {
+                    fetch('http://localhost:8000/habits')
+                        .then(response => response.json())
+                        .then(data => { this.habits = data })
+                },
+                addHabit() {
+                    fetch('http://localhost:8000/habits', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: this.newHabitName })
+                    })
+                        .then(response => response.json())
+                        .then(newHabit => {
+                            this.habits.push(newHabit)
+                            this.newHabitName = ''
+                        })
+                },
+                // ← 新增:打卡
+                checkin(habitId) {
+                    fetch(`http://localhost:8000/habits/${habitId}/checkin`, {
+                        method: 'POST'
+                    })
+                        .then(response => response.json())
+                        .then(result => {
+                            alert('打卡結果:' + JSON.stringify(result))
+                        })
+                },
+                // ← 新增:刪除
+                deleteHabit(habitId) {
+                    fetch(`http://localhost:8000/habits/${habitId}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => response.json())
+                        .then(() => {
+                            // 從畫面上移除這筆(過濾掉被刪的那個 id)
+                            this.habits = this.habits.filter(h => h.id !== habitId)
+                        })
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>

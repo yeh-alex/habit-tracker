@@ -6,7 +6,7 @@ from typing import Optional
 from sqlmodel import Session
 from sqlmodel import select
 from fastapi import FastAPI, HTTPException
-
+from fastapi.middleware.cors import CORSMiddleware
 # --- 定義資料表 ---
 
 class Habit(SQLModel, table=True):
@@ -29,6 +29,14 @@ def create_db_and_tables():
 # --- App ---
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],      # 允許所有來源(開發階段這樣最省事)
+    allow_credentials=True,
+    allow_methods=["*"],      # 允許所有方法(GET/POST/PUT/DELETE)
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def on_startup():
