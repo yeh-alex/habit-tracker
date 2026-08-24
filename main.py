@@ -86,11 +86,11 @@ def get_streak(habit_id: int):
         checkins = session.exec(select(CheckIn).where(CheckIn.habit_id == habit_id)).all()
         checkin_dates = {c.check_date for c in checkins}
         if current_date not in checkin_dates:
-            return streak
+            return {"habit_id": habit_id, "streak": streak}      # ← 改這個
         while current_date in checkin_dates:
             streak += 1
             current_date -= timedelta(days=1)
-        return streak
+        return {"habit_id": habit_id, "streak": streak}          # ← 也要改這個
         
 @app.get("/habits/{habit_id}")
 def get_habit(habit_id: int):

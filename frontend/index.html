@@ -16,8 +16,7 @@
 
         <ul>
             <li v-for="habit in habits" :key="habit.id">
-                {{ habit.name }}
-                <!-- ← 新增:兩個按鈕,把 habit.id 傳給對應的函式 -->
+                {{ habit.name }} — 連續 {{ habit.streak }} 天
                 <button @click="checkin(habit.id)">打卡</button>
                 <button @click="deleteHabit(habit.id)">刪除</button>
             </li>
@@ -41,7 +40,16 @@
                 loadHabits() {
                     fetch('http://localhost:8000/habits')
                         .then(response => response.json())
-                        .then(data => { this.habits = data })
+                        .then(data => {
+                            this.habits = data.map(habit => ({ ...habit, streak: 0 }))
+                            this.habits.forEach(habit => {
+                                fetch(`http://localhost:8000/habits/${habit.id}/streak`)
+                                    .then(response => response.json())
+                                    .then(streakData => {
+                                        habit.streak = streakData.streak
+                                    })
+                            })
+                        })
                 },
                 addHabit() {
                     fetch('http://localhost:8000/habits', {
@@ -55,7 +63,6 @@
                             this.newHabitName = ''
                         })
                 },
-                // ← 新增:打卡
                 checkin(habitId) {
                     fetch(`http://localhost:8000/habits/${habitId}/checkin`, {
                         method: 'POST'
@@ -63,16 +70,22 @@
                         .then(response => response.json())
                         .then(result => {
                             alert('打卡結果:' + JSON.stringify(result))
+
+                            fetch(`http://localhost:8000/habits/${habitId}/streak`)
+                                .then(response => response.json())
+                                .then(streakData => {
+                                    const habit = this.habits.find(h => h.id === habitId)   // 找出那一筆
+                                    habit.streak = streakData.streak
+                                })                         // 更新它(這是「修改已存在欄位」,Vue 追蹤得到!)
+
                         })
                 },
-                // ← 新增:刪除
                 deleteHabit(habitId) {
                     fetch(`http://localhost:8000/habits/${habitId}`, {
                         method: 'DELETE'
                     })
                         .then(response => response.json())
                         .then(() => {
-                            // 從畫面上移除這筆(過濾掉被刪的那個 id)
                             this.habits = this.habits.filter(h => h.id !== habitId)
                         })
                 }
