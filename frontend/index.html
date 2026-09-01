@@ -142,6 +142,19 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
+        .btn-load {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: #ffffff;
+            font-size: 13px;
+            padding: 8px 14px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-load:hover {
+            transform: translateY(-1.5px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
         .btn-delete {
             background: rgba(244, 63, 94, 0.15);
             color: var(--danger);
@@ -282,6 +295,7 @@
                 <div class="actions">
                     <button class="btn-checkin" @click="checkin(habit.id)">打卡</button>
                     <button class="btn-delete" @click="deleteHabit(habit.id)">刪除</button>
+                    <button class="btn-load" @click="loadCheckins(habit.id)">看月曆</button>
                 </div>
             </li>
         </ul>
@@ -303,13 +317,14 @@
                     calendarDays: [],
                     checkedDates: [],
                     currentMonth: 0,
-                    currentYear: 0
+                    currentYear: 0,
+                    selectedHabitId: null
                 }
             },
             mounted() {
                 this.loadHabits()
                 this.generateCalendar()
-                this.loadCheckins(1)
+                // this.loadCheckins(1)
             },
             methods: {
                 // 判斷某一天(day)有沒有打卡
@@ -321,6 +336,7 @@
                 }
                 ,
                 loadCheckins(habitId) {
+                    this.selectedHabitId = habitId
                     fetch(`http://localhost:8000/habits/${habitId}/checkins`)
                         .then(response => response.json())
                         .then(data => {

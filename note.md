@@ -10,5 +10,5 @@ python -m http.server 5500
 # 瀏覽器開 http://localhost:5500
 
 git add .
-git commit -m "說明這次做了什麼"
+git commit -m "加月曆"
 git push
