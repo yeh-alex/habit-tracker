@@ -5,7 +5,7 @@ services:
     environment:
       # 設定 postgres 的帳號密碼和資料庫名
       POSTGRES_USER: habituser
-      POSTGRES_PASSWORD: habitpass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: habitdb
     volumes:
       - postgres_data:/var/lib/postgresql/data # 讓資料庫的資料「存在硬碟」,容器重啟也不會消失
