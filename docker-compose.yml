@@ -1,0 +1,28 @@
+services:
+  # ① 資料庫容器(PostgreSQL)
+  db:
+    image: postgres:16 # 直接用官方 postgres 映像,不用自己寫 Dockerfile
+    environment:
+      # 設定 postgres 的帳號密碼和資料庫名
+      POSTGRES_USER: habituser
+      POSTGRES_PASSWORD: habitpass
+      POSTGRES_DB: habitdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # 讓資料庫的資料「存在硬碟」,容器重啟也不會消失
+    ports:
+      - "5432:5432" # postgres 的預設 port
+
+  # ② 後端容器(你的 FastAPI)
+  backend:
+    build: . # 用你專案裡的 Dockerfile 來 build
+    ports:
+      - "8000:8000"
+    environment:
+      # 關鍵!告訴後端去連 db 這個容器的 postgres
+      DATABASE_URL: postgresql://habituser:habitpass@db:5432/habitdb
+    depends_on:
+      - db # 確保 db 先啟動,backend 才啟動
+
+# 定義那個「存資料的硬碟空間」
+volumes:
+  postgres_data:

@@ -7,6 +7,7 @@ from sqlmodel import Session
 from sqlmodel import select
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import os
 # --- 定義資料表 ---
 
 class Habit(SQLModel, table=True):
@@ -20,11 +21,26 @@ class CheckIn(SQLModel, table=True):
     check_date: date                               # 打卡的日期(只要日期,不要時分秒)
 
 # --- 建立資料庫連線 ---
+# import os
 
-engine = create_engine("sqlite:///habits.db")  # 會在資料夾生出一個 habits.db 檔案
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///habits.db")
+engine = create_engine(DATABASE_URL)
+
+# engine = create_engine("sqlite:///habits.db")  # 會在資料夾生出一個 habits.db 檔案
+import time
+from sqlalchemy.exc import OperationalError
 
 def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)  # 根據上面的 class 建出實體表格
+    for i in range(10):                          # 最多試 10 次
+        try:
+            SQLModel.metadata.create_all(engine)
+            print("資料庫連線成功")
+            return
+        except OperationalError:
+            print(f"資料庫還沒準備好,等待中... (第 {i+1} 次)")
+            time.sleep(2)                        # 等 2 秒再試
+    raise Exception("資料庫連線失敗")
+
 
 # --- App ---
 
