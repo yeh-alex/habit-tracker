@@ -125,3 +125,9 @@ def update_habit(habit_id: int, habit: Habit):
         session.commit()
         session.refresh(habit_update)
         return habit_update
+@app.get("/habits/{habit_id}/checkins")
+def get_checkins(habit_id: int):
+    with Session(engine) as session:
+        checkins = session.exec(select(CheckIn).where(CheckIn.habit_id == habit_id)).all()
+        dates = [c.check_date for c in checkins]
+    return {"habit_id": habit_id, "dates": dates}

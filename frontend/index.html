@@ -8,7 +8,8 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
         :root {
@@ -17,15 +18,19 @@
             --border-color: rgba(255, 255, 255, 0.08);
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            
+
             /* Curated Color Palette */
-            --primary: #6366f1; /* Indigo */
+            --primary: #6366f1;
+            /* Indigo */
             --primary-hover: #4f46e5;
-            --success: #10b981; /* Emerald */
+            --success: #10b981;
+            /* Emerald */
             --success-hover: #059669;
-            --danger: #f43f5e; /* Rose */
+            --danger: #f43f5e;
+            /* Rose */
             --danger-hover: #e11d48;
-            --accent: #f59e0b; /* Amber */
+            --accent: #f59e0b;
+            /* Amber */
         }
 
         * {
@@ -217,9 +222,39 @@
             body {
                 padding: 16px;
             }
+
             #app {
                 padding: 24px 16px;
             }
+        }
+
+        .checked {
+            background-color: var(--success);
+            color: white;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            /* 切成 7 欄,每欄等寬 */
+            gap: 8px;
+            /* 格子之間的間距 */
+            margin-top: 20px;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            /* 讓格子是正方形 */
+            display: flex;
+            align-items: center;
+            /* 數字垂直置中 */
+            justify-content: center;
+            /* 數字水平置中 */
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -240,7 +275,7 @@
                 <div class="habit-info">
                     <span class="habit-name">{{ habit.name }}</span>
                     <span class="habit-streak">
-                        連續打卡 
+                        連續打卡
                         <span class="streak-badge">🔥 {{ habit.streak }} 天</span>
                     </span>
                 </div>
@@ -250,6 +285,11 @@
                 </div>
             </li>
         </ul>
+        <div class="calendar">
+            <div v-for="day in calendarDays" :key="day" :class="{ checked: isChecked(day) }">
+                {{ day }}
+            </div>
+        </div>
     </div>
 
     <script>
@@ -259,13 +299,53 @@
             data() {
                 return {
                     habits: [],
-                    newHabitName: ''
+                    newHabitName: '',
+                    calendarDays: [],
+                    checkedDates: [],
+                    currentMonth: 0,
+                    currentYear: 0
                 }
             },
             mounted() {
                 this.loadHabits()
+                this.generateCalendar()
+                this.loadCheckins(1)
             },
             methods: {
+                // 判斷某一天(day)有沒有打卡
+                isChecked(day) {
+                    const month = String(this.currentMonth + 1).padStart(2, '0')  // 月:+1 再補零
+                    const dayStr = String(day).padStart(2, '0')                    // 日:補零
+                    const target = `${this.currentYear}-${month}-${dayStr}`        // 組成 '2026-09-07'
+                    return this.checkedDates.includes(target)                      // 清單裡有沒有這個
+                }
+                ,
+                loadCheckins(habitId) {
+                    fetch(`http://localhost:8000/habits/${habitId}/checkins`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.checkedDates = data.dates   // 後端回的是 {habit_id, dates},取 dates
+                            console.log(data.dates)
+                        })
+                }
+                ,
+                generateCalendar() {
+                    const today = new Date()
+                    const year = today.getFullYear()
+                    const month = today.getMonth()
+
+
+                    this.currentYear = year
+                    this.currentMonth = month
+
+                    const daysInMonth = new Date(year, month + 1, 0).getDate()
+                    const days = []                          // ← ① 先建空陣列(在迴圈「外面」)
+                    for (let i = 1; i <= daysInMonth; i++) {
+                        days.push(i)                         // ← ② 迴圈裡「只」負責 push
+                    }
+                    this.calendarDays = days                 // ← ③ 迴圈跑完,塞進 state
+                }
+                ,
                 loadHabits() {
                     fetch('http://localhost:8000/habits')
                         .then(response => response.json())
